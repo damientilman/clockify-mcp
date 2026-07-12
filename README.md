@@ -20,12 +20,36 @@ This MCP server allows LLMs (such as Cursor or Claude) to interact with your Clo
 </p>
 
 ## Features
-- **listProjects:** List all projects for the authenticated user
-- **getTimeEntries:** List time entries for the authenticated user (with optional date filters)
-- **addTimeEntry:** Add time entries to a project
-- **listUsers:** List all users in the workspace
-- **getUserTimeEntries:** List time entries for any user (with optional date filters)
-- **getSummaryReport:** Get a summary report of hours by user/project for a date range (optionally filtered by userIds/projectIds). Enables monthly/hourly breakdowns for any user or project.
+
+The server exposes tools across the core Clockify time-tracking scopes. Read tools are available everywhere; write tools (create/update/delete) cover the essentials.
+
+**Workspace & user**
+- **listWorkspaces**, **getCurrentUser**
+
+**Projects**
+- **listProjects**, **getProject**, **createProject**, **updateProject**, **deleteProject**
+
+**Clients**
+- **listClients**, **createClient**, **updateClient**, **deleteClient**
+
+**Tags**
+- **listTags**, **createTag**, **updateTag**, **deleteTag**
+
+**Tasks** (nested under a project)
+- **listTasks**, **createTask**, **updateTask**, **deleteTask**
+
+**Time entries & timer**
+- **getTimeEntries**, **getUserTimeEntries**, **getUserTimeEntriesByName**, **getTimeEntry**
+- **addTimeEntry**, **updateTimeEntry**, **deleteTimeEntry**
+- **startTimer**, **stopTimer**, **getInProgress**
+
+**Reports** (Reports API host)
+- **getSummaryReport**, **getDetailedReport**, **getWeeklyReport**
+
+**Read-only extras**
+- **listUsers**, **listUserGroups**, **listCustomFields**, **listExpenses**
+
+> Note: Clockify returns all monetary amounts in cents (minor units). Divide by 100 for the currency value.
 
 ## Quick Start (Docker — Preferred)
 

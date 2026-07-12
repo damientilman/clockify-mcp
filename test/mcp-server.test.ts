@@ -209,4 +209,143 @@ describe("MCP Server Tools", () => {
     );
     expect(entries[0].description).toBe("Worked on Project");
   });
+
+  it("should expose the extended tool set", async () => {
+    const result = await listToolsHandler();
+    const names = result.tools.map((t) => t.name);
+    for (const name of [
+      "listClients",
+      "createClient",
+      "deleteTimeEntry",
+      "startTimer",
+      "stopTimer",
+      "getInProgress",
+      "getDetailedReport",
+      "getWeeklyReport",
+      "listTags",
+      "createTask",
+    ]) {
+      expect(names).toContain(name);
+    }
+  });
+
+  it("should call createClient with a POST to the clients endpoint", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: "c1", name: "New Client" }),
+    });
+    const result = await callToolHandler({
+      params: { name: "createClient", arguments: { name: "New Client" } },
+    });
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe("https://api.clockify.me/api/v1/workspaces/ws1/clients");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body)).toEqual({ name: "New Client" });
+    const client = JSON.parse(result.content[0].text);
+    expect(client.name).toBe("New Client");
+  });
+
+  it("should delete a time entry and tolerate a 204 empty response", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 204 });
+    const result = await callToolHandler({
+      params: { name: "deleteTimeEntry", arguments: { timeEntryId: "te9" } },
+    });
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe(
+      "https://api.clockify.me/api/v1/workspaces/ws1/time-entries/te9",
+    );
+    expect(init.method).toBe("DELETE");
+    expect(JSON.parse(result.content[0].text)).toEqual({ success: true });
+  });
+
+  it("should start a timer with a start and no end", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: "te10", timeInterval: { end: null } }),
+    });
+    await callToolHandler({
+      params: {
+        name: "startTimer",
+        arguments: { projectId: "p1", description: "Focus" },
+      },
+    });
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe(
+      "https://api.clockify.me/api/v1/workspaces/ws1/time-entries",
+    );
+    expect(init.method).toBe("POST");
+    const body = JSON.parse(init.body);
+    expect(body.end).toBeUndefined();
+    expect(typeof body.start).toBe("string");
+    expect(body.projectId).toBe("p1");
+  });
+
+  it("should stop the running timer with a PATCH setting end", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: "te10" }),
+    });
+    await callToolHandler({
+      params: { name: "stopTimer", arguments: { end: "2026-07-12T10:00:00Z" } },
+    });
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe(
+      "https://api.clockify.me/api/v1/workspaces/ws1/user/user1/time-entries",
+    );
+    expect(init.method).toBe("PATCH");
+    expect(JSON.parse(init.body)).toEqual({ end: "2026-07-12T10:00:00Z" });
+  });
+
+  it("should call getDetailedReport against the reports host with pagination", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ timeentries: [] }),
+    });
+    await callToolHandler({
+      params: {
+        name: "getDetailedReport",
+        arguments: {
+          start: "2026-07-01T00:00:00.000Z",
+          end: "2026-07-12T23:59:59.999Z",
+          pageSize: 100,
+        },
+      },
+    });
+    const [url, init] = fetchMock.mock.calls[1];
+    expect(url).toBe(
+      "https://reports.api.clockify.me/v1/workspaces/ws1/reports/detailed",
+    );
+    const body = JSON.parse(init.body);
+    expect(body.detailedFilter).toEqual({ page: 1, pageSize: 100 });
+  });
+
+  it("should throw on an unknown tool", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ activeWorkspace: "ws1", id: "user1" }),
+    });
+    await expect(
+      callToolHandler({ params: { name: "nope", arguments: {} } }),
+    ).rejects.toThrow(/Unknown tool/);
+  });
 });
