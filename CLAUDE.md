@@ -1,7 +1,23 @@
 <!-- camofox-cloud:start -->
-## Camofox : accès aux sites protégés
+## Accès aux sites protégés : Firecrawl, puis Camofox
 
-Quand un site refuse l'accès (403, captcha, page vide, détection de bot), passer par Camofox, un navigateur furtif hébergé sur le Mac de Damien. Ne l'essayer qu'après l'échec d'un accès direct.
+Quand un site refuse l'accès direct (403, captcha, page vide, détection de bot, contenu rendu en JavaScript), passer par Firecrawl via le connecteur Porter, puis par Camofox si Firecrawl échoue. Tant qu'un accès direct fonctionne, ne pas utiliser plus lourd.
+
+### 1. Firecrawl via Porter (premier choix, en local et en Cloud)
+
+Outil : `execute_action` du connecteur Porter Metrics. Aucun compte à connecter.
+
+- Une page : action `web_scraping.firecrawl_scrape` avec `objective` (obligatoire, une phrase), `url`, `formats: ["markdown"]`, `onlyMainContent: true`.
+- Plusieurs pages d'un site : action `web_scraping.firecrawl_crawl` (asynchrone), toujours avec `limit`. Le statut se suit avec l'action de statut de crawl, à trouver par `list_actions(task="check crawl status")`.
+- Solde : `web_scraping.firecrawl_credit_usage` avec `{"view": "current"}`.
+
+Coûts : 1 crédit par page scrapée ou crawlée, pas par crawl. Les options s'ajoutent (extraction JSON +4 par page, PDF +1 par page). Une page qui revient en 403 est facturée comme les autres : lire `metadata.statusCode` et ne pas réessayer en boucle. Le pool est de 100 000 crédits par mois, remis à zéro le 15 de chaque mois, sans report. Avant un crawl de plus de 100 pages, annoncer le coût estimé à Damien.
+
+La réponse dépasse souvent la limite d'affichage : elle est alors enregistrée dans un fichier, à lire par morceaux.
+
+### 2. Camofox (recours)
+
+Navigateur furtif hébergé sur le Mac de Damien. À utiliser quand Firecrawl renvoie une page vide ou un blocage. Il ne passe pas partout (échec constaté sur g2.com, que Firecrawl passe).
 
 - Session locale : outils MCP `camofox_fetch`, `camofox_search`, `camofox_screenshot`.
 - Session Cloud : appel HTTP avec le jeton de la variable d'environnement `CAMOFOX_TOKEN`.
