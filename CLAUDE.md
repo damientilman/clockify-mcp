@@ -5,7 +5,7 @@ Quand un site refuse l'accès direct (403, captcha, page vide, détection de bot
 
 ### 1. Firecrawl via Porter (premier choix, en local et en Cloud)
 
-Outil : `execute_action` du connecteur Porter Metrics. Aucun compte à connecter.
+Outil : `execute_action` du connecteur Porter Metrics. Aucun compte à connecter. Cet outil n'est pas toujours listé d'office : s'il n'apparaît pas, le charger avec ToolSearch (chercher « porter » ou « execute_action ») avant de conclure qu'il manque. WebFetch ne contourne pas les anti-bots, ne pas s'y arrêter.
 
 - Une page : action `web_scraping.firecrawl_scrape` avec `objective` (obligatoire, une phrase), `url`, `formats: ["markdown"]`, `onlyMainContent: true`.
 - Plusieurs pages d'un site : action `web_scraping.firecrawl_crawl` (asynchrone), toujours avec `limit`. Le statut se suit avec l'action de statut de crawl, à trouver par `list_actions(task="check crawl status")`.
@@ -13,7 +13,7 @@ Outil : `execute_action` du connecteur Porter Metrics. Aucun compte à connecter
 
 Coûts : 1 crédit par page scrapée ou crawlée, pas par crawl. Les options s'ajoutent (extraction JSON +4 par page, PDF +1 par page). Une page qui revient en 403 est facturée comme les autres : lire `metadata.statusCode` et ne pas réessayer en boucle. Le pool est de 100 000 crédits par mois, remis à zéro le 15 de chaque mois, sans report. Avant un crawl de plus de 100 pages, annoncer le coût estimé à Damien.
 
-La réponse dépasse souvent la limite d'affichage : elle est alors enregistrée dans un fichier, à lire par morceaux.
+Un message qui commence par « Error: result (N characters) exceeds maximum allowed tokens » n'est pas un échec : l'appel a réussi et le contenu complet est dans le fichier dont le chemin est indiqué. Ne pas relancer le scrape. Lire le fichier par morceaux (python ou jq sur le JSON, champ `result.markdown`) et vérifier `result.metadata.statusCode`.
 
 ### 2. Camofox (recours)
 
