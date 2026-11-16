@@ -38,3 +38,17 @@ curl -s -H "Authorization: Bearer $CAMOFOX_TOKEN" \
 
 La réponse de `/fetch` et `/search` est un JSON `{url, text, truncated, nextOffset}`. Si `truncated` est vrai, relancer avec `"offset": <nextOffset>`. Limite de 20 requêtes par minute. Sur un 401 ou une connexion impossible, le dire à Damien (le Mac est peut-être éteint) au lieu de chercher un contournement.
 <!-- camofox-cloud:end -->
+
+
+<!-- points-ouverts:start -->
+## Points ouverts : vérifier l'état réel avant de les relancer
+
+Avant de mentionner, de rappeler ou de demander quoi que ce soit sur un point ouvert, contrôler son état réel avec un outil, dans le même tour. Points ouverts : un brouillon ou un envoi en attente, un commit non poussé ou une branche non fusionnée, un timer en cours, un mail sans réponse, une tâche « pour demain », un déploiement, tout ce qui est resté « en attente » plus tôt dans la conversation. Damien agit en dehors du chat (Gmail, Todoist, git, agenda) : l'état dont je me souviens est souvent périmé.
+
+- S'applique à tout endroit où un point peut ressurgir : récap de fin de session, ligne « prochaines étapes », rappel de timer, synthèse d'état, phrase de clôture.
+- Comment contrôler : Gmail (brouillon présent, programmé ou envoyé), git (statut, commits non poussés, branche distante), Todoist ou ClickUp (tâche clôturée ou replanifiée), Google Calendar (événement créé), timetracker `status`, Vercel ou Railway (état du déploiement).
+- Déjà fait : ne rien en dire, ou au plus une ligne pour signaler que c'est vérifié. Ne jamais demander à Damien de confirmer ce qu'un outil peut montrer.
+- Encore ouvert : le citer une seule fois, avec la preuve du contrôle.
+- Illisible depuis cette session : le dire en une ligne et nommer ce qui manque, sans le présenter comme ouvert.
+- Cas à éviter : conclure par « le brouillon à X attend dans Gmail, pense à programmer l'envoi » alors que l'envoi est déjà programmé. Une recherche Gmail avant d'écrire cette ligne supprime la remarque.
+<!-- points-ouverts:end -->
