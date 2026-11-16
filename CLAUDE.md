@@ -5,7 +5,7 @@ Quand un site refuse l'accès direct (403, captcha, page vide, détection de bot
 
 ### 1. Firecrawl via Porter (premier choix, en local et en Cloud)
 
-Outil : `execute_action` du connecteur Porter Metrics. Aucun compte à connecter. Cet outil n'est pas toujours listé d'office : s'il n'apparaît pas, le charger avec ToolSearch (chercher « porter » ou « execute_action ») avant de conclure qu'il manque. WebFetch ne contourne pas les anti-bots, ne pas s'y arrêter.
+Outil : `execute_action` du connecteur Porter Metrics. Attention, ce connecteur s'affiche sous le nom « Google Search Analytics MCP » : ses outils s'appellent `mcp__claude_ai_Google_Search_Analytics_MCP__execute_action` et `mcp__claude_ai_Google_Search_Analytics_MCP__list_actions`, jamais « porter ». Aucun compte à connecter. Il n'est pas toujours listé d'office : s'il n'apparaît pas, le charger avec ToolSearch en cherchant `execute_action` (ou `Google_Search_Analytics`) avant de conclure qu'il manque. WebFetch ne contourne pas les anti-bots, ne pas s'y arrêter.
 
 - Une page : action `web_scraping.firecrawl_scrape` avec `objective` (obligatoire, une phrase), `url`, `formats: ["markdown"]`, `onlyMainContent: true`.
 - Plusieurs pages d'un site : action `web_scraping.firecrawl_crawl` (asynchrone), toujours avec `limit`. Le statut se suit avec l'action de statut de crawl, à trouver par `list_actions(task="check crawl status")`.
